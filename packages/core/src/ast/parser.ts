@@ -1,5 +1,7 @@
 import * as parser from "@solidity-parser/parser";
-import type { ASTNode, ASTVisitor } from "@solidity-parser/parser/dist/src/ast-types";
+import type { ASTNode, ASTVisitor } from "./types";
+
+export type { ASTNode, ASTVisitor } from "./types";
 
 export interface ParseResult {
   ast: ASTNode | null;
