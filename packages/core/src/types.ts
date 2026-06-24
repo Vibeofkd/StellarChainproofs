@@ -25,6 +25,12 @@ export interface Finding {
   swcId?: string;
   /** Whether this was enhanced/explained by LLM */
   llmEnhanced?: boolean;
+  /** File where the vulnerable code is defined */
+  definedIn?: string;
+  /** File of the contract that inherits the issue */
+  inheritedBy?: string;
+  /** Resolved import chain from inheriting file to definition file */
+  importPath?: string[];
 }
 
 // ─── Gas optimization hint ────────────────────────────────────────────────────
@@ -48,6 +54,27 @@ export interface FileScanResult {
   parseError?: string;
 }
 
+// ─── Complexity / Maintainability Metrics ──────────────────────────────────────
+
+export interface HighComplexityFunction {
+  name: string;
+  cc: number;
+}
+
+export interface ContractMetrics {
+  contract: string;
+  file: string;
+  linesOfCode: number;
+  functionCount: number;
+  inheritanceDepth: number;
+  avgCyclomaticComplexity: number;
+  highComplexityFunctions: Array<{ name: string; cc: number }>;
+  externalCallsPerFunction: Record<string, number>;
+  stateVariableCount: number;
+  visibilityDistribution: Record<string, number>;
+  riskScore: number; // 0-100 composite
+}
+
 // ─── Full scan result for a project ──────────────────────────────────────────
 
 export interface ScanResult {
@@ -64,6 +91,32 @@ export interface ScanResult {
     gas: number;
     total: number;
   };
+  /** Complexity and maintainability metrics per contract */
+  metrics?: ContractMetrics[];
+}
+
+// ─── Plugin API ──────────────────────────────────────────────────────────────
+
+export type ASTNode = any; // From @solidity-parser/parser
+
+export interface PluginRule {
+  /** Unique rule ID e.g. "MYTEAM-001" */
+  id: string;
+  /** Short human-readable title */
+  title: string;
+  severity: Severity;
+  /** Full explanation of the vulnerability */
+  description: string;
+  /** Suggested fix */
+  recommendation?: string;
+  /** Detection function */
+  detect: (ast: ASTNode, source: string, filePath: string) => Finding[];
+}
+
+export interface ChainProofPlugin {
+  name: string;
+  version: string;
+  rules: PluginRule[];
 }
 
 // ─── Scanner config ───────────────────────────────────────────────────────────
@@ -75,12 +128,9 @@ export interface ScanConfig {
   useSlither: boolean;
   /** Send findings to LLM for explanation */
   useLLM: boolean;
-
-  /**
-   * Provider API key.
-   *
-   * Backward compatible with prior Anthropic-only implementation.
-   */
+  /** Compute complexity metrics */
+  useMetrics: boolean;
+  /** Anthropic API key */
   apiKey?: string;
 
   /**
@@ -96,5 +146,7 @@ export interface ScanConfig {
   minSeverity?: Severity;
   /** Output format */
   outputFormat?: "json" | "markdown" | "table";
+  /** Array of plugins to load */
+  plugins?: ChainProofPlugin[];
 }
 

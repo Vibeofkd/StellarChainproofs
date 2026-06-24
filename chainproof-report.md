@@ -1,6 +1,6 @@
 # ChainProof Security Audit Report
 
-**Generated:** 2026-04-18T16:30:33.747Z
+**Generated:** 2026-06-22T03:34:14.126Z
 **ChainProof version:** 0.1.0
 **Files scanned:** 1
 
@@ -9,12 +9,12 @@
 | Severity | Count |
 |----------|-------|
 | 🔴 Critical | 3 |
-| 🟠 High     | 2 |
+| 🟠 High     | 4 |
 | 🟡 Medium   | 1 |
 | 🟢 Low      | 0 |
 | 🔵 Info     | 0 |
 | ⛽ Gas      | 0 |
-| **Total** | **6** |
+| **Total** | **8** |
 
 > ⚠️ **This contract has critical or high severity findings. Do not deploy to mainnet without addressing these issues.**
 
@@ -146,7 +146,49 @@ require(tx.origin == owner, "Not owner");
 
 ---
 
-#### 6. 🟡 [MEDIUM] Unchecked call return value
+#### 6. 🟠 [HIGH] Unchecked external call result
+
+- **ID:** `EXAMPLE-002`
+- **Location:** Line 45
+
+**Description**
+
+This external call result is not checked. An attacker could cause it to fail silently.
+
+**Recommendation**
+
+Use require() to check the return value or wrap in try-catch.
+
+**Affected Code**
+
+```solidity
+(bool success, ) = msg.sender.call{value: amount}("");
+```
+
+---
+
+#### 7. 🟠 [HIGH] Unchecked external call result
+
+- **ID:** `EXAMPLE-002`
+- **Location:** Line 61
+
+**Description**
+
+This external call result is not checked. An attacker could cause it to fail silently.
+
+**Recommendation**
+
+Use require() to check the return value or wrap in try-catch.
+
+**Affected Code**
+
+```solidity
+recipient.call{value: rewardPool}("");
+```
+
+---
+
+#### 8. 🟡 [MEDIUM] Unchecked call return value
 
 - **ID:** `CP-104` ([SWC-104](https://swcregistry.io/docs/SWC-104))
 - **Location:** Line 61
